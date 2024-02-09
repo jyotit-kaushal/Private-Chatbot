@@ -1,0 +1,268 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tweet Analysis Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px; /* Increased margin */
+            padding: 20px; /* Increased padding */
+            background-color: #1a1a2e; /* Dark Blue */
+            color: #ffa07a; /* Light Salmon */
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            flex-direction: column; /* Stack items vertically */
+        }
+
+        h1 {
+            color: #ff8c00; /* Dark Orange */
+            font-size: 36px; /* Larger font size */
+            text-align: center; /* Center the text */
+            margin-bottom: 20px; /* Increased margin */
+        }
+
+        form {
+            margin: 20px;
+            text-align: center; /* Center the text */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input {
+            padding: 12px;
+            margin-bottom: 10px; /* Increased space between input and button */
+            width: 80%;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: #4CAF50; /* Green */
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #resultContainer {
+            margin: 20px;
+            text-align: center; /* Center the text */
+        }
+
+        #fileListContainer {
+            margin: 20px;
+            background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white background */
+            border-radius: 10px; /* Rounded corners */
+            padding: 20px; /* Increased padding */
+            max-width: 1000px; /* Set a maximum width for better aesthetics */
+            text-align: left; /* Left-align the text */
+        }
+
+        #fileList {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex; /* Display items horizontally */
+            flex-direction: column; /* Stack items vertically */
+            align-items: flex-start; /* Align items to the left */
+        }
+
+        #fileList li {
+            margin-bottom: 10px; /* Increased space between items */
+            cursor: pointer;
+            display: flex; /* Display items horizontally */
+            justify-content: space-between; /* Equal space between checkbox and text */
+            align-items: center; /* Align items vertically */
+        }
+
+        #fileList input {
+            margin-right: 10px; /* Add space between checkbox and text */
+        }
+
+        #fileList li.selected {
+            background-color: #2a2a3e; /* Darker Blue */
+        }
+
+        .action-buttons {
+            margin: 20px;
+            text-align: center; /* Center the text */
+        }
+
+        .action-buttons button {
+            margin-right: 10px;
+        }
+
+        #loadingSpinner {
+            display: none;
+            border: 8px solid rgba(255, 255, 255, 0.3); /* Light transparent color */
+            border-top: 8px solid #ff8c00; /* Dark Orange color */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite; /* Rotate animation */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            margin-top: -20px; /* Half of the height */
+            margin-left: -20px; /* Half of the width */
+            z-index: 9999; /* Set a high z-index to ensure it's on top */
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+
+    </style>
+</head>
+<body>
+    <h1>Tweet Analysis Tool</h1>
+
+    <form onsubmit="submitQuery(); return false;">
+        <label for="query">Enter your tweet:</label>
+        <input type="text" id="query" name="query" required>
+        <br> <!-- Added line break for better separation -->
+        <button type="submit">Submit</button>
+    </form>
+
+    <div id="loadingSpinner"></div>
+
+    <div id="resultContainer">
+        <!-- Result will be displayed here -->
+    </div>
+
+    <h2>File Checklist:</h2>
+    <div id="fileListContainer">
+        <ul id="fileList">
+            <!-- File names will be displayed here as list items -->
+        </ul>
+    </div>
+
+    <div class="action-buttons">
+        <button onclick="runIngestScript()">Re-Ingest Documents</button>
+        <button onclick="deleteSelectedFiles()">Delete Selected Files</button>
+    </div>
+
+    <script>
+        function showLoadingSpinner() {
+            // Display the loading spinner
+            document.getElementById('loadingSpinner').style.display = 'block';
+        }
+
+        function hideLoadingSpinner() {
+            // Hide the loading spinner
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
+        function submitQuery() {
+            var query = document.getElementById('query').value;
+            var resultContainer = document.getElementById('resultContainer');
+            
+            showLoadingSpinner();
+
+            // Make an asynchronous request to the server
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/process', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Update the result container with the processed result
+                    var response = JSON.parse(xhr.responseText);
+                    resultContainer.innerHTML = "<h2>Result:</h2><p>" + response.result + "</p>";
+                    
+                    hideLoadingSpinner();
+                
+                }
+            };
+            xhr.send('query=' + encodeURIComponent(query));
+        }
+
+        function runIngestScript() {
+            // Make an asynchronous request to the server to run ingest.py
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/run_ingest', true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Log or handle the response if needed
+                    console.log(xhr.responseText);
+                    // Refresh the file list after running ingest.py
+                    updateFileList();
+                }
+            };
+            xhr.send();
+        }
+
+        function updateFileList() {
+            // Make an asynchronous request to the server to get the file list
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/get_file_list', true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Update the file list with the received data
+                    var fileListContainer = document.getElementById('fileList');
+                    fileListContainer.innerHTML = xhr.responseText;
+                }
+            };
+            xhr.send();
+        }
+
+        function deleteSelectedFiles() {
+            var selectedFiles = document.querySelectorAll('input[name="files"]:checked');
+            var fileNames = Array.from(selectedFiles).map(function (file) {
+                return file.value;
+            });
+
+            if (fileNames.length === 0) {
+                alert('Please select files to delete.');
+                return;
+            }
+
+            // Make an asynchronous request to the server to delete selected files
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/delete_files', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Log or handle the response if needed
+                    console.log(xhr.responseText);
+                    // Refresh the file list after deleting files
+                    updateFileList();
+                }
+            };
+            xhr.send(JSON.stringify({ files: fileNames }));
+        }
+
+        // Update the file list when the page loads
+        window.onload = updateFileList;
+
+        // Example: Populate the file list dynamically (you may replace this with your logic)
+        var fileList = document.getElementById('fileList');
+        for (var i = 1; i <= 10; i++) {
+            var listItem = document.createElement('li');
+            
+            var checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            listItem.appendChild(checkbox);
+
+            var fileName = document.createElement('span');
+            fileName.textContent = 'File ' + i;
+            listItem.appendChild(fileName);
+
+            fileList.appendChild(listItem);
+        }
+    </script>
+</body>
+</html>

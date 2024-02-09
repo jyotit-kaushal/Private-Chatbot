@@ -1,0 +1,42 @@
+<!-- templates/result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Web App - Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #1a1a2e; /* Dark Blue */
+            color: #ffa07a; /* Light Salmon */
+            text-align: center;
+        }
+
+        h1 {
+            color: #ff8c00; /* Dark Orange */
+            font-size: 36px;
+        }
+
+        p {
+            margin-top: 20px;
+            color: #ff8c00; /* Dark Orange */
+        }
+
+        a {
+            color: #4CAF50;
+        }
+
+        a:hover {
+            color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Result:</h1>
+    <p>{{ result }}</p>
+    <p><a href="/">Back to Home</a></p>
+</body>
+</html>

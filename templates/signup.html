@@ -1,0 +1,89 @@
+<!-- templates/signup.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #1a1a2e; /* Dark Blue */
+            color: #ffa07a; /* Light Salmon */
+            text-align: center;
+        }
+
+        h1 {
+            color: #ff8c00; /* Dark Orange */
+            font-size: 36px;
+        }
+
+        form {
+            margin: 20px;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input {
+            padding: 12px;
+            margin-bottom: 10px;
+            width: 80%;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: #4CAF50; /* Green */
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        p {
+            color: #ff8c00;
+            margin-top: 20px;
+        }
+
+        a {
+            color: #4CAF50;
+        }
+
+        a:hover {
+            color: #45a049;
+        }
+
+        p.error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sign Up</h1>
+    
+    <form method="post" action="/signup">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br>
+
+        <button type="submit">Sign Up</button>
+    </form>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <p>Already have an account? <a href="/login">Log in here</a>.</p>
+</body>
+</html>
